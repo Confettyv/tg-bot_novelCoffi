@@ -1,0 +1,26 @@
+services:
+  novel-translator-bot:
+    build: .
+    env_file: .env
+    environment:
+      # Inside Docker Compose the bot reaches LibreTranslate by service name, not localhost.
+      LIBRETRANSLATE_URL: http://libretranslate:5000
+    volumes:
+      - ./storage:/app/storage
+    depends_on:
+      - libretranslate
+    restart: unless-stopped
+
+  libretranslate:
+    image: libretranslate/libretranslate:latest
+    command: ["--host", "0.0.0.0", "--load-only", "en,ja,ko,ru"]
+    ports:
+      - "5000:5000"
+    volumes:
+      - libretranslate_data:/home/libretranslate/.local/share
+      - libretranslate_cache:/home/libretranslate/.local/cache
+    restart: unless-stopped
+
+volumes:
+  libretranslate_data:
+  libretranslate_cache:
